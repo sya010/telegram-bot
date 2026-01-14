@@ -1,92 +1,193 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import os
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    ContextTypes,
+    CallbackQueryHandler,
+)
 
-# ✅ Get the token from environment variables (safe for GitHub)
-TOKEN = os.environ.get("BOT_TOKEN")
+# 🔐 READ TOKEN FROM FILE (Replit safe method)
+with open("secret.txt", "r") as f:
+    TOKEN = f.read().strip()
 
-# --- Command functions ---
+# ======================
+# MAIN MENU
+# ======================
+def main_menu():
+    keyboard = [
+        [InlineKeyboardButton("📌 Services", callback_data="menu_services")],
+        [InlineKeyboardButton("💰 Pricing", callback_data="menu_pricing")],
+        [InlineKeyboardButton("📞 Contact", callback_data="menu_contact")],
+        [InlineKeyboardButton("❓ Help", callback_data="menu_help")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ======================
+# SERVICES MENU
+# ======================
+def services_menu():
+    keyboard = [
+        [
+            InlineKeyboardButton("🌐 Website", callback_data="service_web"),
+            InlineKeyboardButton("🖥 Software", callback_data="service_software"),
+        ],
+        [
+            InlineKeyboardButton("📱 Mobile Apps", callback_data="service_mobile"),
+            InlineKeyboardButton("🎨 Design", callback_data="service_design"),
+        ],
+        [
+            InlineKeyboardButton("⌨️ Typing", callback_data="service_typing"),
+        ],
+        [
+            InlineKeyboardButton("⬅️ Back", callback_data="back_main"),
+        ],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ======================
+# START COMMAND
+# ======================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Welcome to Rozh Studio Bot! Use /help to see available commands."
+        "👋 Welcome to *Rozh Studio*\n\n"
+        "Professional digital services.\n"
+        "Choose an option below:",
+        reply_markup=main_menu(),
+        parse_mode="Markdown",
     )
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "/start - Start the bot\n"
-        "/services - View Rozh Studio services\n"
-        "/coding - Website, software, app info\n"
-        "/web - Website design & development\n"
-        "/software - Custom software development\n"
-        "/mobile - Mobile app development\n"
-        "/design - UI/UX & graphic design\n"
-        "/typing - Typing, data entry & documents\n"
-        "/pricing - Pricing & packages\n"
-        "/contact - Contact or request project\n"
-        "/help - Show this help menu"
-    )
 
-async def services(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "📌 Rozh Studio Services:\n"
-        "Website, Software, Mobile Apps, UI/UX Design, Typing/Data Entry"
-    )
+# ======================
+# BUTTON HANDLER
+# ======================
+async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
 
-async def coding(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "💻 Rozh Studio can create websites, software, and mobile apps."
-    )
+    data = query.data
 
-async def web(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🌐 Website services: design, development, SEO-friendly, responsive."
-    )
+    # ----- MAIN MENU -----
+    if data == "menu_services":
+        await query.edit_message_text(
+            "📌 *Rozh Studio Services*\nSelect a service:",
+            reply_markup=services_menu(),
+            parse_mode="Markdown",
+        )
 
-async def software(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🖥️ Custom software: desktop apps, automation, and business solutions."
-    )
+    elif data == "menu_pricing":
+        await query.edit_message_text(
+            "💰 *Pricing & Packages*\n\n"
+            "✔ Prices depend on project size\n"
+            "✔ Affordable & flexible\n\n"
+            "Contact us for a custom quote.",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="back_main")]]
+            ),
+            parse_mode="Markdown",
+        )
 
-async def mobile(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "📱 Mobile apps for Android & iOS with high-quality UI/UX."
-    )
+    elif data == "menu_contact":
+        await query.edit_message_text(
+            "📞 *Contact Rozh Studio*\n\n"
+            "📧 Email: rozhstudio@email.com\n"
+            "📱 Telegram: @RozhStudio\n\n"
+            "We respond quickly!",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="back_main")]]
+            ),
+            parse_mode="Markdown",
+        )
 
-async def design(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🎨 Graphic & UI/UX design: modern, creative, and professional."
-    )
+    elif data == "menu_help":
+        await query.edit_message_text(
+            "❓ *Help*\n\n"
+            "• Use the buttons to navigate\n"
+            "• Choose services easily\n"
+            "• Contact us anytime",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="back_main")]]
+            ),
+            parse_mode="Markdown",
+        )
 
-async def typing(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "⌨️ Typing, data entry, document formatting, and admin support."
-    )
+    # ----- SERVICES -----
+    elif data == "service_web":
+        await query.edit_message_text(
+            "🌐 *Website Development*\n\n"
+            "✔ Modern design\n"
+            "✔ Fast & responsive\n"
+            "✔ SEO ready",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="menu_services")]]
+            ),
+            parse_mode="Markdown",
+        )
 
-async def pricing(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "💰 Ask about pricing and packages via /contact or message us."
-    )
+    elif data == "service_software":
+        await query.edit_message_text(
+            "🖥 *Custom Software*\n\n"
+            "✔ Desktop apps\n"
+            "✔ Business automation\n"
+            "✔ Custom solutions",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="menu_services")]]
+            ),
+            parse_mode="Markdown",
+        )
 
-async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "📞 Contact Rozh Studio: [Your email/phone] or DM here."
-    )
+    elif data == "service_mobile":
+        await query.edit_message_text(
+            "📱 *Mobile App Development*\n\n"
+            "✔ Android & iOS\n"
+            "✔ High performance\n"
+            "✔ Clean UI/UX",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="menu_services")]]
+            ),
+            parse_mode="Markdown",
+        )
 
-# --- Set up the bot ---
+    elif data == "service_design":
+        await query.edit_message_text(
+            "🎨 *UI/UX & Graphic Design*\n\n"
+            "✔ Modern layouts\n"
+            "✔ Branding & visuals\n"
+            "✔ Professional look",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="menu_services")]]
+            ),
+            parse_mode="Markdown",
+        )
+
+    elif data == "service_typing":
+        await query.edit_message_text(
+            "⌨️ *Typing & Data Entry*\n\n"
+            "✔ Fast typing\n"
+            "✔ Accurate documents\n"
+            "✔ Formatting services",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("⬅️ Back", callback_data="menu_services")]]
+            ),
+            parse_mode="Markdown",
+        )
+
+    elif data == "back_main":
+        await query.edit_message_text(
+            "🏠 *Main Menu*\nChoose an option:",
+            reply_markup=main_menu(),
+            parse_mode="Markdown",
+        )
+
+
+# ======================
+# APP SETUP
+# ======================
 app = ApplicationBuilder().token(TOKEN).build()
 
-# Add all command handlers
 app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("help", help_command))
-app.add_handler(CommandHandler("services", services))
-app.add_handler(CommandHandler("coding", coding))
-app.add_handler(CommandHandler("web", web))
-app.add_handler(CommandHandler("software", software))
-app.add_handler(CommandHandler("mobile", mobile))
-app.add_handler(CommandHandler("design", design))
-app.add_handler(CommandHandler("typing", typing))
-app.add_handler(CommandHandler("pricing", pricing))
-app.add_handler(CommandHandler("contact", contact))
+app.add_handler(CallbackQueryHandler(buttons))
 
-print("🤖 Rozh Studio Bot started")
+print("🤖 Rozh Studio Bot is running")
 app.run_polling()
